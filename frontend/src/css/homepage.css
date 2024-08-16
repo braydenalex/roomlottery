@@ -1,0 +1,201 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header Styles */
+.homepage-header {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px 0;
+    position: sticky;
+    height: 17vh;
+    width: 100%;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    height: 90px;
+    margin-top: 1vh;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.nav-list li {
+    margin-left: 20px;
+}
+
+.nav-list a {
+    color: #6d8d23;
+    font-weight: 500;
+    font-size: 130%;
+    transition: color 0.3s ease;
+}
+
+.nav-list a:hover {
+    color: #a4c062;
+}
+
+/* Hero Section */
+.hero {
+    background-image: url('https://www.pointpark.edu/Photos_1280x720/academic_exterior_danielkelly_1280.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    padding-top: 15vh;
+    margin-top: 40vh;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.hero-content {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cta-button {
+    background-color: #6d8d23;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    margin: 15px;
+    margin-top: 30px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #8ba749;
+    transform: scale(1.05);
+}
+
+/* Info Section */
+.info-section {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.info-steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    margin-left: 10vh;
+    margin-right: 10vh;
+}
+
+.step {
+    flex: 1;
+    background-color: white;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100vh;
+    transition: transform 0.3s ease;
+}
+
+.step:hover {
+    transform: translateY(-5px);
+}
+
+/* Responsive Design for Steps */
+@media (max-width: 768px) {
+    .info-steps {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step {
+        max-width: 100%;
+        margin: 10px 0;
+    }
+}
+
+/* Timeline Section */
+.timeline-section {
+    padding: 60px 20px;
+    background-color: white;
+    text-align: center;
+}
+
+.timeline-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    margin-left: 15vh;
+    margin-right: 15vh;
+}
+
+.timeline-list li {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-left: 5px solid #6d8d23;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 0 0;
+}
+
+.footer-links li {
+    margin-left: 20px;
+}
+
+.footer-links a {
+    color: white;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #a4c062;
+}

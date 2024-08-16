@@ -1,0 +1,115 @@
+.admin-dashboard-container {
+  padding: 40px;
+  background-color: #f4f4f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 40px;
+}
+
+.logout-button {
+  background-color: #6d8d23;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #7da335;
+  transform: translateY(-2px);
+}
+
+.current-user {
+  text-align: left;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.dashboard-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex: 
+
+1;
+  min-width: 300px;
+  text-align: left;
+}
+
+.dashboard-card h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+.dashboard-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-card input, .dashboard-card select {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.create-button, .update-button, .delete-button {
+  background-color: #6d8d23;
+  color: white;
+  padding: 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+}
+
+.create-button:hover, .update-button:hover, .delete-button:hover {
+  background-color: #7da335;
+  transform: translateY(-2px);
+}
+
+.manage-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.manage-card ul li {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.manage-card ul li p {
+  margin: 5px 0;
+}
