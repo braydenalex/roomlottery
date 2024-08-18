@@ -23,7 +23,7 @@ function Dashboard() {
         const token = localStorage.getItem('token');
 
         // Fetch user data
-        const userResponse = await fetch('http://localhost:5000/api/user/me', {
+        const userResponse = await fetch('/api/user/me', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -36,14 +36,14 @@ function Dashboard() {
         }
 
         // Fetch lotteries the user is entered in
-        const enteredResponse = await fetch('http://localhost:5000/api/user/my-lotteries', {
+        const enteredResponse = await fetch('/api/user/my-lotteries', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const enteredData = await enteredResponse.json();
         setEnteredLotteries(enteredData);
 
         // Fetch available lotteries
-        const availableResponse = await fetch('http://localhost:5000/api/user/available-lotteries', {
+        const availableResponse = await fetch('/api/user/available-lotteries', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const availableData = await availableResponse.json();
@@ -72,7 +72,7 @@ function Dashboard() {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/user/enter-lottery/${selectedLottery}`, {
+      const response = await fetch(`/api/user/enter-lottery/${selectedLottery}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

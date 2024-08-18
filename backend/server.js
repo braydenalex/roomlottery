@@ -6,6 +6,7 @@ const sequelize = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const authController = require('./controllers/authController');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: 15, // Limit each IP to 5 requests per windowMs
   message: 'Too many login attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false, 
@@ -29,7 +30,7 @@ const registerLimiter = rateLimit({
 
 const globalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per minute
+  max: 200, // Limit each IP to 100 requests per minute
   message: 'Too many requests, please try again later.',
 });
 
@@ -43,8 +44,8 @@ app.use(globalLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
-app.post('/api/auth/login', loginLimiter, loginController);
-app.post('/api/auth/register', registerLimiter, registerController);
+app.post('/api/auth/login', loginLimiter, authController.login);
+app.post('/api/auth/register', registerLimiter, authController.register);
 
 sequelize.sync({ force: false }).then(() => {
   console.log('Database synced');

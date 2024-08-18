@@ -25,7 +25,7 @@ function AdminDashboard() {
       }
 
       try {
-        const userResponse = await fetch('http://localhost:5000/api/user/me', {
+        const userResponse = await fetch('/api/user/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userData = await userResponse.json();
@@ -35,7 +35,7 @@ function AdminDashboard() {
           navigate('/login');
         }
 
-        const lotteriesResponse = await fetch('http://localhost:5000/api/admin/lotteries/all', {
+        const lotteriesResponse = await fetch('/api/admin/lotteries/all', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const lotteriesData = await lotteriesResponse.json();
@@ -56,7 +56,7 @@ function AdminDashboard() {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5000/api/admin/lotteries/create', {
+      const response = await fetch('/admin/lotteries/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ function AdminDashboard() {
     if (updateLottery.max_applicants) updatedFields.max_applicants = updateLottery.max_applicants;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/lotteries/${updateLottery.id}`, {
+      const response = await fetch(`/api/admin/lotteries/${updateLottery.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ function AdminDashboard() {
   const handleDeleteLottery = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/lotteries/${id}`, {
+      const response = await fetch(`/api/admin/lotteries/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -128,7 +128,7 @@ function AdminDashboard() {
     setSelectedLottery(lotteryId);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/lotteries/${lotteryId}/applicants`, {
+      const response = await fetch(`/api/admin/lotteries/${lotteryId}/applicants`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -144,7 +144,7 @@ function AdminDashboard() {
   };
 
   const handleRemoveApplicant = (applicantId) => {
-    fetch(`http://localhost:5000/api/admin/lotteries/${selectedLottery}/applicants/${applicantId}`, {
+    fetch(`/api/admin/lotteries/${selectedLottery}/applicants/${applicantId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ function AdminDashboard() {
   const handleSelectWinners = async (lotteryId) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/lotteries/${lotteryId}/select-winners`, {
+      const response = await fetch(`/api/admin/lotteries/${lotteryId}/select-winners`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -453,7 +453,6 @@ function AdminDashboard() {
             <button onClick={handleCloseModal} className="close-button">Close</button>
           </div>
         </div>
-      )}
     )}
   </div>
 </div>
