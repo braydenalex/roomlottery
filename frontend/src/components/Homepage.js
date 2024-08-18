@@ -92,11 +92,6 @@ function Homepage() {
       <footer id="contact">
         <div className="container">
           <p>&copy; 2024 Point Park University. All rights reserved.</p>
-          <ul className="footer-links">
-            <li><a href="/#">Privacy Policy</a></li>
-            <li><a href="/#">Terms of Service</a></li>
-            <li><a href="/#">Contact Us</a></li>
-          </ul>
         </div>
       </footer>
     </div>

@@ -7,11 +7,38 @@ function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Password validation function
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const maxLength = 24;
+    const specialCharCount = (password.match(/[\W_]/g) || []).length;
+
+    if (password.length < minLength) {
+      return `Password must be at least ${minLength} characters long.`;
+    }
+    if (password.length > maxLength) {
+      return `Password must be at most ${maxLength} characters long.`;
+    }
+    if (specialCharCount < 2) {
+      return 'Password must contain at least 2 special characters.';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    // Validate password
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -41,10 +68,10 @@ function Register() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-      <img
-        src="https://www.pointpark.edu/_files/images/logo-vertical--green.svg"
-        alt="University Logo"
-        className="logo"
+        <img
+          src="https://www.pointpark.edu/_files/images/logo-vertical--green.svg"
+          alt="University Logo"
+          className="logo"
         />
         <h2>Room Lottery Registration</h2>
         <form onSubmit={handleSubmit}>
@@ -73,17 +100,24 @@ function Register() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="show-password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
           </div>
           <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

@@ -135,4 +135,42 @@ router.delete('/lotteries/:lottery_id/applicants/:applicant_id', verifyAdminToke
   }
 });
 
+router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const lottery = await RoomLottery.findByPk(id);
+
+    if (!lottery) {
+      return res.status(404).json({ error: 'Lottery not found' });
+    }
+
+    const applicants = await UserLotteryEntry.findAll({
+      where: { lottery_id: id },
+      include: [
+        {
+          model: User,
+          attributes: ['email', 'studentId'],
+        },
+      ],
+      order: [
+        ['athletic_status', 'DESC'],
+        ['athletic_status', 'DESC'],
+        ['created_at', 'ASC'],
+      ],
+    });
+
+    if (applicants.length === 0) {
+      return res.status(404).json({ message: 'No applicants found for this lottery.' });
+    }
+
+    // Select winners based on max_applicants
+    const winners = applicants.slice(0, lottery.max_applicants);
+    
+    res.json({ winners });
+  } catch (error) {
+    console.error('Failed to select winners:', error);
+    res.status(500).json({ error: 'Failed to select winners' });
+  }
+});
+
 module.exports = router;

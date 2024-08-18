@@ -3,11 +3,35 @@ const ApprovedStudentId = require('../models/ApprovedStudentId');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// Function to validate the password
+const validatePassword = (password) => {
+  const minLength = 8;
+  const maxLength = 24;
+  const specialCharCount = (password.match(/[\W_]/g) || []).length;
+
+  if (password.length < minLength) {
+    throw new Error(`Password must be at least ${minLength} characters long.`);
+  }
+  if (password.length > maxLength) {
+    throw new Error(`Password must be at most ${maxLength} characters long.`);
+  }
+  if (specialCharCount < 2) {
+    throw new Error('Password must contain at least 2 special characters.');
+  }
+};
+
 exports.register = async (req, res) => {
   try {
     console.log('Received registration request:', req.body);
 
     const { studentId, email, password } = req.body;
+
+    // Validate the password
+    try {
+      validatePassword(password);
+    } catch (validationError) {
+      return res.status(400).json({ error: validationError.message });
+    }
 
     console.log('Checking if student ID is valid...');
     const validStudent = await ApprovedStudentId.findOne({ where: { student_id: studentId } });

@@ -103,3 +103,14 @@ input:focus {
 .auth-link a:hover {
   color: #8ba749;
 }
+
+.show-password-toggle {
+  background: none;
+  border: none;
+  color: #6d8d23;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 12px;
+  padding: 0;
+  font-weight: 600;
+}

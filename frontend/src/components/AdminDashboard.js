@@ -11,6 +11,8 @@ function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [selectedLottery, setSelectedLottery] = useState(null);
   const [isDetailedView, setIsDetailedView] = useState(true);
+  const [winners, setWinners] = useState([]);
+  const [showWinnersModal, setShowWinnersModal] = useState(false);
   const [applicants, setApplicants] = useState([]);
   const navigate = useNavigate();
 
@@ -23,7 +25,6 @@ function AdminDashboard() {
       }
 
       try {
-        // Fetch the current user
         const userResponse = await fetch('http://localhost:5000/api/user/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -34,7 +35,6 @@ function AdminDashboard() {
           navigate('/login');
         }
 
-        // Fetch lotteries
         const lotteriesResponse = await fetch('http://localhost:5000/api/admin/lotteries/all', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -79,7 +79,6 @@ function AdminDashboard() {
     e.preventDefault();
     const token = localStorage.getItem('token');
 
-    // Only include fields that have values (fields left empty won't be updated)
     const updatedFields = {};
     if (updateLottery.lottery_name) updatedFields.lottery_name = updateLottery.lottery_name;
     if (updateLottery.room_type) updatedFields.room_type = updateLottery.room_type;
@@ -95,7 +94,7 @@ function AdminDashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updatedFields), // Send only the fields that need updating
+        body: JSON.stringify(updatedFields),
       });
       if (response.ok) {
         const updated = await response.json();
@@ -145,12 +144,6 @@ function AdminDashboard() {
   };
 
   const handleRemoveApplicant = (applicantId) => {
-    console.log('Attempting to remove applicant with ID:', applicantId); // Add this to debug
-    if (!applicantId) {
-      console.error('Invalid applicant ID:', applicantId); // Log if ID is invalid
-      return;
-    }
-
     fetch(`http://localhost:5000/api/admin/lotteries/${selectedLottery}/applicants/${applicantId}`, {
       method: 'DELETE',
       headers: {
@@ -175,7 +168,37 @@ function AdminDashboard() {
   };
 
   const toggleView = () => {
-    setIsDetailedView(!isDetailedView);  // Toggle between views
+    setIsDetailedView(!isDetailedView);
+  };
+
+  const handleSelectWinners = async (lotteryId) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/lotteries/${lotteryId}/select-winners`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setWinners(data.winners);
+        setSelectedLottery(lotteryId);
+        setShowWinnersModal(true);
+      } else {
+        setError('Failed to select winners');
+      }
+    } catch (error) {
+      setError('Error selecting winners');
+    }
+  };
+
+  const handleCloseWinnersModal = () => {
+    setShowWinnersModal(false);
+    setSelectedLottery(null);
+    setWinners([]);
   };
 
   const handleLogout = () => {
@@ -240,102 +263,158 @@ function AdminDashboard() {
             <button type="submit" className="create-button">Create Lottery</button>
           </form>
         </div>
+    <div className="dashboard-card update-card">
+      <h2>Update Lottery</h2>
+      <form onSubmit={handleUpdateLottery}>
+        <select
+          value={updateLottery.id}
+          onChange={(e) => {
+            const selectedLottery = lotteries.find((lottery) => lottery.id === parseInt(e.target.value));
+            setUpdateLottery({ ...selectedLottery, id: e.target.value });
+          }}
+          required
+        >
+          <option value="">Select Lottery</option>
+          {lotteries.map((lottery) => (
+            <option key={lottery.id} value={lottery.id}>
+              {lottery.lottery_name}
+            </option>
+          ))}
+        </select>
 
-        <div className="dashboard-card update-card">
-          <h2>Update Lottery</h2>
-          <form onSubmit={handleUpdateLottery}>
-            <select
-              value={updateLottery.id}
-              onChange={(e) => {
-                const selectedLottery = lotteries.find((lottery) => lottery.id === e.target.value);
-                setUpdateLottery({ ...selectedLottery, id: e.target.value });
-              }}
-              required
-            >
-              <option value="">Select Lottery</option>
-              {lotteries.map((lottery) => (
-                <option key={lottery.id} value={lottery.id}>
-                  {lottery.lottery_name}
-                </option>
-              ))}
-            </select>
+        <input
+          type="text"
+          placeholder="Lottery Name"
+          value={updateLottery.lottery_name || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, lottery_name: e.target.value })}
+        />
+
+        <input
+          type="text"
+          placeholder="Room Type"
+          value={updateLottery.room_type || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, room_type: e.target.value })}
+        />
+
+        <input
+          type="text"
+          placeholder="Building"
+          value={updateLottery.building || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, building: e.target.value })}
+        />
+
+        <input
+          type="text"
+          placeholder="Floor"
+          value={updateLottery.floor || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, floor: e.target.value })}
+        />
+
+        <input
+          type="number"
+          placeholder="Max Applicants"
+          value={updateLottery.max_applicants || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, max_applicants: e.target.value })}
+        />
+
+        <select
+          value={updateLottery.status || ''}
+          onChange={(e) => setUpdateLottery({ ...updateLottery, status: e.target.value })}
+          required
+        >
+          <option value="">Select Status</option>
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+          <option value="Pending">Pending</option>
+        </select>
+
+        <button type="submit" className="update-button">Update Lottery</button>
+      </form>
+    </div>
+
+    <div className="dashboard-card manage-card">
+      <h2>Manage Lotteries</h2>
+      <ul>
+        {lotteries.map((lottery) => (
+          <li key={lottery.id}>
+            <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
+            <p><strong>Building:</strong> {lottery.building}</p>
+            <p><strong>Floor:</strong> {lottery.floor}</p>
+            <p><strong>Room Type:</strong> {lottery.room_type}</p>
+            <p><strong>Max Applicants:</strong> {lottery.max_applicants}</p>
+            <p><strong>Status:</strong> {lottery.status}</p>
+            <button onClick={() => handleOpenModal(lottery.id)} className="edit-button">View Applicants</button>
+            <button onClick={() => handleDeleteLottery(lottery.id)} className="delete-button">Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="dashboard-card select-winners-card">
+      <h2>Select Winners for Lotteries</h2>
+      <ul>
+        {lotteries.map((lottery) => (
+          <li key={lottery.id}>
+            <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
+            <p><strong>Building:</strong> {lottery.building}</p>
+            <p><strong>Floor:</strong> {lottery.floor}</p>
+            <p><strong>Room Type:</strong> {lottery.room_type}</p>
+            <button onClick={() => handleSelectWinners(lottery.id)} className="select-winners-button">
+              Select Winners
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+      {showWinnersModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Winners for Lottery ID: {selectedLottery}</h2>
             
-            <input
-              type="text"
-              placeholder="Lottery Name"
-              value={updateLottery.lottery_name || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, lottery_name: e.target.value })}
-            />
-
-            <input
-              type="text"
-              placeholder="Room Type"
-              value={updateLottery.room_type || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, room_type: e.target.value })}
-            />
-
-            <input
-              type="text"
-              placeholder="Building"
-              value={updateLottery.building || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, building: e.target.value })}
-            />
-
-            <input
-              type="text"
-              placeholder="Floor"
-              value={updateLottery.floor || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, floor: e.target.value })}
-            />
-
-            <input
-              type="number"
-              placeholder="Max Applicants"
-              value={updateLottery.max_applicants || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, max_applicants: e.target.value })}
-            />
-
-            <select
-              value={updateLottery.status || ''}
-              onChange={(e) => setUpdateLottery({ ...updateLottery, status: e.target.value })}
-              required
-            >
-              <option value="">Select Status</option>
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-              <option value="Pending">Pending</option>
-            </select>
-
-            <button type="submit" className="update-button">Update Lottery</button>
-          </form>
+            {/* Toggle View Button */}
+            <button onClick={toggleView} className="toggle-view-button">
+              {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
+            </button>
+            
+            {/* Winners List */}
+            <ul className="winners-list">
+              {winners.map((winner, index) => (
+                <li key={winner.id} className="winner-item">
+                  {/* Render based on isDetailedView */}
+                  {isDetailedView ? (
+                    <>
+                      <p><strong>Winner {index + 1}:</strong> {winner.user.email} - {winner.user.studentId}</p>
+                      <p><strong>Room Preference:</strong> {winner.room_preference}</p>
+                      <p><strong>Academic Status:</strong> {winner.academic_status}</p>
+                      <p><strong>Athletic Status:</strong> {winner.athletic_status}</p>
+                    </>
+                  ) : (
+                    <>
+                      <span><strong>Winner {index + 1}:</strong> {winner.user.email} - {winner.user.studentId}</span>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+            
+            {/* Close Button */}
+            <button onClick={handleCloseWinnersModal} className="close-button">Close</button>
+          </div>
         </div>
-
-        <div className="dashboard-card manage-card">
-          <h2>Manage Lotteries</h2>
-          <ul>
-            {lotteries.map((lottery) => (
-              <li key={lottery.id}>
-                <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
-                <p><strong>Building:</strong> {lottery.building}</p>
-                <p><strong>Floor:</strong> {lottery.floor}</p>
-                <p><strong>Room Type:</strong> {lottery.room_type}</p>
-                <p><strong>Max Applicants:</strong> {lottery.max_applicants}</p>
-                <p><strong>Status:</strong> {lottery.status}</p>
-                <button onClick={() => handleOpenModal(lottery.id)} className="edit-button">View Applicants</button>
-                <button onClick={() => handleDeleteLottery(lottery.id)} className="delete-button">Delete</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      )}
 
       {showModal && (
         <div className="modal">
           <div className="modal-content">
             <h2>Applicants for Lottery ID: {selectedLottery}</h2>
+            
+            {/* Toggle View Button */}
             <button onClick={toggleView} className="toggle-view-button">
               {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
             </button>
+            
+            {/* Applicants List */}
             <ul className={isDetailedView ? 'detailed-view' : 'condensed-view'}>
               {applicants.map(applicant => (
                 <li key={applicant.id} className="applicant-item">
@@ -347,23 +426,38 @@ function AdminDashboard() {
                       <p><strong>Athletic Status:</strong> {applicant.athletic_status || 'N/A'}</p>
                       <p><strong>Room Preference:</strong> {applicant.room_preference || 'N/A'}</p>
                       <p><strong>Entered On:</strong> {new Date(applicant.created_at).toLocaleString()}</p>
+                      <button 
+                        onClick={() => handleRemoveApplicant(applicant.id)} 
+                        className="delete-applicant-button"
+                      >
+                        Remove Applicant
+                      </button>
                     </>
                   ) : (
                     <>
                       <span>{applicant.user?.email || 'N/A'}:</span>
-                      <span>{applicant.user?.studentId || 'N/A'} - </span>
-                      <span>{applicant.room_preference || 'N/A'}</span>
+                      <span>{applicant.user?.studentId || 'N/A'} </span>
+                      <button 
+                        onClick={() => handleRemoveApplicant(applicant.id)} 
+                        className="delete-applicant-button"
+                      >
+                        Remove Applicant
+                      </button>
                     </>
                   )}
                 </li>
               ))}
             </ul>
+            
+            {/* Close Button */}
             <button onClick={handleCloseModal} className="close-button">Close</button>
           </div>
         </div>
-          )}
-    </div>
-    );
-  }
+      )}
+    )}
+  </div>
+</div>
+);
+}
 
-  export default AdminDashboard;
+export default AdminDashboard;
