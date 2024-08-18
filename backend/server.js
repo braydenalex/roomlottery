@@ -20,6 +20,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 
-sequelize.sync().then(() => console.log('DB connected'));
+sequelize.sync({ force: false }).then(() => {
+  console.log('Database synced');
+}).catch(error => {
+  console.error('Failed to sync database:', error);
+});
 
 app.listen(5000, () => console.log('Server started on port 5000'));

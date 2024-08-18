@@ -12,12 +12,29 @@ const RoomLottery = sequelize.define('room_lottery', {
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'pending',
+    defaultValue: 'Pending',
+  },
+  building: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  floor: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  max_applicants: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
 }, {
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
+  tableName: 'room_lotteries',
 });
+
+RoomLottery.associate = function(models) {
+  RoomLottery.hasMany(models.UserLotteryEntry, { foreignKey: 'lottery_id' });
+};
 
 module.exports = RoomLottery;

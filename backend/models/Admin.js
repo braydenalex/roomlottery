@@ -10,7 +10,7 @@ const Admin = sequelize.define('admin', {
 }, {
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false,
+  updatedAt: 'updated_at'
 });
 
 module.exports = Admin;

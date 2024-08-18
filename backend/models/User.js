@@ -15,12 +15,15 @@ const User = sequelize.define('user', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
 }, {
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
+
+// Associations
+User.associate = function(models) {
+  User.hasMany(models.UserLotteryEntry, { foreignKey: 'user_id' });
+};
 
 module.exports = User;
