@@ -1,7 +1,7 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const verifyToken = require('../middleware/authMiddleware');
-const { User, UserLotteryEntry, RoomLottery } = require('../models');
+const { User, UserLotteryEntry, RoomLottery, LotteryRoomType } = require('../models');
 const router = express.Router();
 
 router.get('/me', verifyToken, async (req, res) => {
@@ -25,21 +25,26 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
-// Get lotteries a user is entered in
 router.get('/my-lotteries', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
     const enteredLotteries = await UserLotteryEntry.findAll({
       where: { user_id: userId },
-      include: [
-        {
-          model: RoomLottery, // Link RoomLottery based on lottery_id in UserLotteryEntry
-          attributes: ['lottery_name', 'building', 'floor', 'room_type'],
-          foreignKey: 'id', // This ensures that lottery_id in user_lottery_entry is matched with id in room_lotteries
-        },
-      ],
+      include: [{
+        model: RoomLottery,
+        as: 'room_lottery',  // Ensure alias is correct
+        include: [{
+          model: LotteryRoomType,
+          as: 'room_types',  // Ensure alias is correct
+          attributes: ['id', 'room_type', 'max_applicants'],
+        }],
+        attributes: ['id', 'lottery_name', 'building', 'floor', 'status'],
+      }],
     });
+
+    // Log the fetched lotteries for debugging
+    console.log('Entered Lotteries:', JSON.stringify(enteredLotteries, null, 2));
 
     res.json(enteredLotteries);
   } catch (error) {
@@ -48,20 +53,42 @@ router.get('/my-lotteries', verifyToken, async (req, res) => {
   }
 });
 
+// Get room types for a specific lottery
+router.get('/lotteries/:lottery_id/room-types', verifyToken, async (req, res) => {
+  const { lottery_id } = req.params;
+
+  try {
+    const roomTypes = await LotteryRoomType.findAll({
+      where: { lottery_id },
+    });
+
+    if (!roomTypes.length) {
+      return res.status(404).json({ error: 'No room types found for this lottery' });
+    }
+
+    res.json(roomTypes);
+  } catch (error) {
+    console.error('Error fetching room types:', error);
+    res.status(500).json({ error: 'Failed to fetch room types' });
+  }
+});
+
 // Get available lotteries for user to enter
 router.get('/available-lotteries', verifyToken, async (req, res) => {
   try {
     const userEntries = await UserLotteryEntry.findAll({ where: { user_id: req.user.id } });
-
-    // Get IDs of lotteries the user has already entered
     const enteredLotteryIds = userEntries.map(entry => entry.lottery_id);
 
-    // Fetch lotteries that the user hasn't entered
     const availableLotteries = await RoomLottery.findAll({
       where: {
         id: { [Op.notIn]: enteredLotteryIds },
-        status: 'Open' // Ensure the lottery is open for entry
-      }
+        status: 'Open',
+      },
+      include: [{
+        model: LotteryRoomType,
+        as: 'room_types',  // Ensure alias matches the model definition
+        attributes: ['id', 'room_type', 'max_applicants'],
+      }],
     });
 
     res.json(availableLotteries);
@@ -76,13 +103,26 @@ router.post('/enter-lottery/:lottery_id', verifyToken, async (req, res) => {
   const { lottery_id } = req.params;
   const { room_preference, academic_status, athletic_status } = req.body;
 
-  // Ensure the user doesn't enter more than one lottery
-  const existingEntry = await UserLotteryEntry.findOne({ where: { user_id: req.user.id } });
-  if (existingEntry) {
-    return res.status(400).json({ error: 'You are already entered in a lottery' });
-  }
-
   try {
+    // Check if the user is already entered in a lottery
+    const existingEntry = await UserLotteryEntry.findOne({ where: { user_id: req.user.id } });
+    if (existingEntry) {
+      return res.status(400).json({ error: 'You are already entered in a lottery' });
+    }
+
+    // Fetch the room types and calculate total available spots
+    const roomTypes = await LotteryRoomType.findAll({ where: { lottery_id } });
+    const totalAvailableSpots = roomTypes.reduce((total, roomType) => total + roomType.max_applicants, 0);
+
+    // Fetch the current number of users entered in this lottery
+    const currentEntriesCount = await UserLotteryEntry.count({ where: { lottery_id } });
+
+    // Prevent entry if the total entries exceed available spots
+    if (currentEntriesCount >= totalAvailableSpots) {
+      return res.status(400).json({ error: 'No more spots available in this lottery.' });
+    }
+
+    // If spots are available, allow the user to enter the lottery
     const entry = await UserLotteryEntry.create({
       user_id: req.user.id,
       lottery_id,
@@ -93,7 +133,36 @@ router.post('/enter-lottery/:lottery_id', verifyToken, async (req, res) => {
 
     res.status(201).json(entry);
   } catch (error) {
+    console.error('Error entering lottery:', error);
     res.status(500).json({ error: 'Failed to enter lottery' });
+  }
+});
+
+// Fetch notifications for the logged-in user
+router.get('/notifications', verifyToken, async (req, res) => {
+  try {
+    const notifications = await Notification.findAll({
+      where: { user_id: req.user.id, is_read: false },
+      order: [['created_at', 'DESC']],
+    });
+    res.json(notifications);
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+// Clear all notifications for the logged-in user
+router.delete('/notifications', verifyToken, async (req, res) => {
+  try {
+    await Notification.update(
+      { is_read: true },
+      { where: { user_id: req.user.id } }
+    );
+    res.json({ message: 'Notifications cleared' });
+  } catch (error) {
+    console.error('Failed to clear notifications:', error);
+    res.status(500).json({ error: 'Failed to clear notifications' });
   }
 });
 

@@ -5,6 +5,7 @@ import '../css/auth.css';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);  // Added showPassword state
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -58,12 +59,19 @@ function Login() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}  // Toggle between text and password
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="show-password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}  // Toggle showPassword state
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
           </div>
           {error && <div className="error-message">{error}</div>}
           <button type="submit" className="auth-button">Login</button>

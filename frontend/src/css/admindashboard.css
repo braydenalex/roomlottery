@@ -95,6 +95,14 @@
   transform: translateY(-2px);
 }
 
+.delete-button {
+  background-color: rgb(234, 51, 35, 1.0);
+}
+
+.delete-button:hover {
+  background-color: rgb(200, 51, 35, 1.0);
+}
+
 .manage-card ul {
   list-style: none;
   padding: 0;
@@ -110,6 +118,20 @@
 
 .manage-card ul li p {
   margin: 5px 0;
+}
+
+.remove-roomtype-button {
+  margin-bottom: 20px;
+  background-color: rgb(234, 51, 35, 1.0);
+  font-size: 70%;
+}
+.remove-roomtype-button:hover {
+  background-color: rgb(200, 51, 35, 1.0);
+}
+
+.add-roomtype-button {
+  margin-bottom: 20px;
+  font-size: 70%;
 }
 
 .error-message {
@@ -196,17 +218,30 @@
 .select-winners-button {
   background-color: #6d8d23;
   color: white;
-  padding: 10px 15px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  font-size: 14px;
   font-weight: 600;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  margin-top: 10px;
 }
 
 .select-winners-button:hover {
   background-color: #7da335;
   transform: translateY(-2px);
+}
+
+.select-winners-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.select-winners-card ul li {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.select-winners-card ul li p {
+  margin: 5px 0;
 }

@@ -2,7 +2,8 @@ const User = require('./User');
 const Admin = require('./Admin');
 const ApprovedStudentId = require('./ApprovedStudentId');
 const RoomLottery = require('./RoomLottery');
-const UserLotteryEntry = require('./UserLotteryEntry')
+const UserLotteryEntry = require('./UserLotteryEntry');
+const LotteryRoomType = require('./LotteryRoomType');
 
 const models = {
   User,
@@ -10,6 +11,7 @@ const models = {
   ApprovedStudentId,
   RoomLottery,
   UserLotteryEntry,
+  LotteryRoomType
 }
 
 Object.keys(models).forEach(modelName => {
@@ -23,5 +25,6 @@ module.exports = {
   Admin,
   ApprovedStudentId,
   RoomLottery,
-  UserLotteryEntry
+  UserLotteryEntry,
+  LotteryRoomType
 };

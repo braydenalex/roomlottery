@@ -58,6 +58,15 @@ function Homepage() {
         </div>
       </section>
 
+      {/* Button Section for Mobile */}
+      <section className="button-section">
+        <h2>Welcome to the Room Selection Lottery</h2>
+        <div className="button-group">
+          <button onClick={() => navigate('/login')} className="cta-button">Login</button>
+          <button onClick={handleDashboardClick} className="cta-button">Dashboard</button>
+        </div>
+      </section>
+
       <section className="info-section" id="how-it-works">
         <div className="container">
           <h2>How It Works</h2>

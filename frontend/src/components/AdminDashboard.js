@@ -4,8 +4,20 @@ import '../css/admindashboard.css';
 
 function AdminDashboard() {
   const [lotteries, setLotteries] = useState([]);
-  const [newLottery, setNewLottery] = useState({ lottery_name: '', room_type: '', building: '', floor: '', max_applicants: '' });
-  const [updateLottery, setUpdateLottery] = useState({ id: '', lottery_name: '', room_type: '', status: '', building: '', floor: '', max_applicants: '' });
+  const [newLottery, setNewLottery] = useState({
+    lottery_name: '',
+    building: '',
+    floor: '',
+    room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
+  });
+  const [updateLottery, setUpdateLottery] = useState({
+    id: '',
+    lottery_name: '',
+    building: '',
+    floor: '',
+    room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
+    status: '',
+  });
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -35,15 +47,7 @@ function AdminDashboard() {
           navigate('/login');
         }
 
-        const lotteriesResponse = await fetch('/api/admin/lotteries/all', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const lotteriesData = await lotteriesResponse.json();
-        if (lotteriesResponse.ok) {
-          setLotteries(lotteriesData);
-        } else {
-          setError('Failed to fetch lotteries');
-        }
+        await fetchLotteries(token);  // Fetch lotteries
       } catch (error) {
         setError('Failed to fetch data');
       }
@@ -52,11 +56,27 @@ function AdminDashboard() {
     fetchUserAndLotteries();
   }, [navigate]);
 
+    const fetchLotteries = async (token) => {
+    try {
+      const lotteriesResponse = await fetch('/api/admin/lotteries/all', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const lotteriesData = await lotteriesResponse.json();
+      if (lotteriesResponse.ok) {
+        setLotteries(lotteriesData);
+      } else {
+        setError('Failed to fetch lotteries');
+      }
+    } catch (error) {
+      setError('Failed to fetch lotteries');
+    }
+  };
+
   const handleCreateLottery = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('/admin/lotteries/create', {
+      const response = await fetch('/api/admin/lotteries/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,8 +85,13 @@ function AdminDashboard() {
         body: JSON.stringify(newLottery),
       });
       if (response.ok) {
-        const createdLottery = await response.json();
-        setLotteries([...lotteries, createdLottery]);
+        setNewLottery({
+          lottery_name: '',
+          building: '',
+          floor: '',
+          room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
+        }); // Reset form
+        await fetchLotteries(token);
       } else {
         setError('Failed to create lottery');
       }
@@ -75,17 +100,59 @@ function AdminDashboard() {
     }
   };
 
+  const handleRoomTypeChange = (index, field, value) => {
+    setNewLottery((prevState) => {
+      const updatedRoomTypes = [...prevState.room_types];
+      updatedRoomTypes[index] = {
+        ...updatedRoomTypes[index],
+        [field]: value,
+      };
+      return { ...prevState, room_types: updatedRoomTypes };
+    });
+  };
+
+  const handleAddUpdateRoomType = () => {
+    setUpdateLottery((prevState) => ({
+      ...prevState,
+      room_types: [...prevState.room_types, { id: Date.now(), room_type: '', max_applicants: '' }],
+    }));
+  };
+
+  const handleRemoveUpdateRoomType = (index) => {
+    setUpdateLottery((prevState) => ({
+      ...prevState,
+      room_types: prevState.room_types.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleUpdateRoomTypeChange = (index, field, value) => {
+    setUpdateLottery((prevState) => {
+      const updatedRoomTypes = [...prevState.room_types];
+      updatedRoomTypes[index] = {
+        ...updatedRoomTypes[index],
+        [field]: value,
+      };
+      return { ...prevState, room_types: updatedRoomTypes };
+    });
+  };
+
+  const handleAddRoomType = () => {
+    setNewLottery((prevState) => ({
+      ...prevState,
+      room_types: [...prevState.room_types, { id: Date.now(), room_type: '', max_applicants: '' }],
+    }));
+  };
+
+  const handleRemoveRoomType = (index) => {
+    setNewLottery((prevState) => ({
+      ...prevState,
+      room_types: prevState.room_types.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleUpdateLottery = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-
-    const updatedFields = {};
-    if (updateLottery.lottery_name) updatedFields.lottery_name = updateLottery.lottery_name;
-    if (updateLottery.room_type) updatedFields.room_type = updateLottery.room_type;
-    if (updateLottery.status) updatedFields.status = updateLottery.status;
-    if (updateLottery.building) updatedFields.building = updateLottery.building;
-    if (updateLottery.floor) updatedFields.floor = updateLottery.floor;
-    if (updateLottery.max_applicants) updatedFields.max_applicants = updateLottery.max_applicants;
 
     try {
       const response = await fetch(`/api/admin/lotteries/${updateLottery.id}`, {
@@ -94,16 +161,55 @@ function AdminDashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updatedFields),
+        body: JSON.stringify(updateLottery),
       });
       if (response.ok) {
-        const updated = await response.json();
-        setLotteries(lotteries.map((lottery) => (lottery.id === updated.id ? updated : lottery)));
+        const updatedLottery = await response.json();
+        setUpdateLottery({
+          id: '',
+          lottery_name: '',
+          building: '',
+          floor: '',
+          room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
+          status: '',
+        });  // Reset form
+        await fetchLotteries(token);  // Refresh lotteries list
       } else {
         setError('Failed to update lottery');
       }
     } catch (error) {
-      setError('Failed to update lottery');
+      setError('Error updating lottery');
+    }
+  };
+
+  const handleUpdateLotterySelection = (e) => {
+    const selectedId = parseInt(e.target.value);
+    const selectedLottery = lotteries.find((lottery) => lottery.id === selectedId);
+
+    if (selectedLottery) {
+      // Set updateLottery state with the selected lottery's details
+      setUpdateLottery({
+        id: selectedLottery.id,
+        lottery_name: selectedLottery.lottery_name || '',
+        building: selectedLottery.building || '',
+        floor: selectedLottery.floor || '',
+        room_types: selectedLottery.room_types ? selectedLottery.room_types.map((rt) => ({
+          id: rt.id || Date.now(),
+          room_type: rt.room_type || '',
+          max_applicants: rt.max_applicants || '',
+        })) : [{ id: Date.now(), room_type: '', max_applicants: '' }],
+        status: selectedLottery.status || '',
+      });
+    } else {
+      // Reset the form if no lottery is selected
+      setUpdateLottery({
+        id: '',
+        lottery_name: '',
+        building: '',
+        floor: '',
+        room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
+        status: '',
+      });
     }
   };
 
@@ -124,7 +230,7 @@ function AdminDashboard() {
     }
   };
 
-  const handleOpenModal = async (lotteryId) => {
+    const handleOpenModal = async (lotteryId) => {
     setSelectedLottery(lotteryId);
     const token = localStorage.getItem('token');
     try {
@@ -220,243 +326,237 @@ function AdminDashboard() {
       )}
 
       {error && <p className="error-message">{error}</p>}
-
+      
       <div className="dashboard-content">
+              {/* Create New Lottery Section */}
         <div className="dashboard-card create-card">
-          <h2>Create New Lottery</h2>
-          <form onSubmit={handleCreateLottery}>
-            <input
-              type="text"
-              placeholder="Lottery Name"
-              value={newLottery.lottery_name}
-              onChange={(e) => setNewLottery({ ...newLottery, lottery_name: e.target.value })}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Room Type"
-              value={newLottery.room_type}
-              onChange={(e) => setNewLottery({ ...newLottery, room_type: e.target.value })}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Building"
-              value={newLottery.building}
-              onChange={(e) => setNewLottery({ ...newLottery, building: e.target.value })}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Floor"
-              value={newLottery.floor}
-              onChange={(e) => setNewLottery({ ...newLottery, floor: e.target.value })}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Max Applicants"
-              value={newLottery.max_applicants}
-              onChange={(e) => setNewLottery({ ...newLottery, max_applicants: e.target.value })}
-              required
-            />
-            <button type="submit" className="create-button">Create Lottery</button>
-          </form>
-        </div>
-    <div className="dashboard-card update-card">
-      <h2>Update Lottery</h2>
-      <form onSubmit={handleUpdateLottery}>
-        <select
-          value={updateLottery.id}
-          onChange={(e) => {
-            const selectedLottery = lotteries.find((lottery) => lottery.id === parseInt(e.target.value));
-            setUpdateLottery({ ...selectedLottery, id: e.target.value });
-          }}
-          required
-        >
-          <option value="">Select Lottery</option>
-          {lotteries.map((lottery) => (
-            <option key={lottery.id} value={lottery.id}>
-              {lottery.lottery_name}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          placeholder="Lottery Name"
-          value={updateLottery.lottery_name || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, lottery_name: e.target.value })}
-        />
-
-        <input
-          type="text"
-          placeholder="Room Type"
-          value={updateLottery.room_type || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, room_type: e.target.value })}
-        />
-
-        <input
-          type="text"
-          placeholder="Building"
-          value={updateLottery.building || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, building: e.target.value })}
-        />
-
-        <input
-          type="text"
-          placeholder="Floor"
-          value={updateLottery.floor || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, floor: e.target.value })}
-        />
-
-        <input
-          type="number"
-          placeholder="Max Applicants"
-          value={updateLottery.max_applicants || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, max_applicants: e.target.value })}
-        />
-
-        <select
-          value={updateLottery.status || ''}
-          onChange={(e) => setUpdateLottery({ ...updateLottery, status: e.target.value })}
-          required
-        >
-          <option value="">Select Status</option>
-          <option value="Open">Open</option>
-          <option value="Closed">Closed</option>
-          <option value="Pending">Pending</option>
-        </select>
-
-        <button type="submit" className="update-button">Update Lottery</button>
-      </form>
-    </div>
-
-    <div className="dashboard-card manage-card">
-      <h2>Manage Lotteries</h2>
-      <ul>
-        {lotteries.map((lottery) => (
-          <li key={lottery.id}>
-            <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
-            <p><strong>Building:</strong> {lottery.building}</p>
-            <p><strong>Floor:</strong> {lottery.floor}</p>
-            <p><strong>Room Type:</strong> {lottery.room_type}</p>
-            <p><strong>Max Applicants:</strong> {lottery.max_applicants}</p>
-            <p><strong>Status:</strong> {lottery.status}</p>
-            <button onClick={() => handleOpenModal(lottery.id)} className="edit-button">View Applicants</button>
-            <button onClick={() => handleDeleteLottery(lottery.id)} className="delete-button">Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div className="dashboard-card select-winners-card">
-      <h2>Select Winners for Lotteries</h2>
-      <ul>
-        {lotteries.map((lottery) => (
-          <li key={lottery.id}>
-            <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
-            <p><strong>Building:</strong> {lottery.building}</p>
-            <p><strong>Floor:</strong> {lottery.floor}</p>
-            <p><strong>Room Type:</strong> {lottery.room_type}</p>
-            <button onClick={() => handleSelectWinners(lottery.id)} className="select-winners-button">
-              Select Winners
+        <h2>Create New Lottery</h2>
+        <form onSubmit={handleCreateLottery}>
+          <input
+            type="text"
+            placeholder="Lottery Name"
+            value={newLottery.lottery_name}
+            onChange={(e) => setNewLottery({ ...newLottery, lottery_name: e.target.value })}
+            required
+          />
+          <div>
+            {newLottery.room_types.map((roomType, index) => (
+              <div key={roomType.id} className="room-type-group">
+                <input
+                  type="text"
+                  placeholder="Room Type"
+                  value={roomType.room_type}
+                  onChange={(e) => handleRoomTypeChange(index, 'room_type', e.target.value)}
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="Max Applicants"
+                  value={roomType.max_applicants}
+                  onChange={(e) => handleRoomTypeChange(index, 'max_applicants', e.target.value)}
+                  required
+                />
+                {newLottery.room_types.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveRoomType(index)}
+                    className="remove-roomtype-button"
+                  >
+                    - Room Type
+                  </button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={handleAddRoomType} className="add-roomtype-button">
+              + Room Type
             </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-
-      {showWinnersModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Winners for Lottery ID: {selectedLottery}</h2>
-            
-            {/* Toggle View Button */}
-            <button onClick={toggleView} className="toggle-view-button">
-              {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
-            </button>
-            
-            {/* Winners List */}
-            <ul className="winners-list">
-              {winners.map((winner, index) => (
-                <li key={winner.id} className="winner-item">
-                  {/* Render based on isDetailedView */}
-                  {isDetailedView ? (
-                    <>
-                      <p><strong>Winner {index + 1}:</strong> {winner.user.email} - {winner.user.studentId}</p>
-                      <p><strong>Room Preference:</strong> {winner.room_preference}</p>
-                      <p><strong>Academic Status:</strong> {winner.academic_status}</p>
-                      <p><strong>Athletic Status:</strong> {winner.athletic_status}</p>
-                    </>
-                  ) : (
-                    <>
-                      <span><strong>Winner {index + 1}:</strong> {winner.user.email} - {winner.user.studentId}</span>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-            
-            {/* Close Button */}
-            <button onClick={handleCloseWinnersModal} className="close-button">Close</button>
           </div>
-        </div>
-      )}
+          <input
+            type="text"
+            placeholder="Building"
+            value={newLottery.building}
+            onChange={(e) => setNewLottery({ ...newLottery, building: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Floor"
+            value={newLottery.floor}
+            onChange={(e) => setNewLottery({ ...newLottery, floor: e.target.value })}
+            required
+          />
+          <button type="submit" className="create-button">Create Lottery</button>
+        </form>
+      </div>
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Applicants for Lottery ID: {selectedLottery}</h2>
-            
-            {/* Toggle View Button */}
-            <button onClick={toggleView} className="toggle-view-button">
-              {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
-            </button>
-            
-            {/* Applicants List */}
-            <ul className={isDetailedView ? 'detailed-view' : 'condensed-view'}>
-              {applicants.map(applicant => (
-                <li key={applicant.id} className="applicant-item">
-                  {isDetailedView ? (
-                    <>
-                      <p><strong>Email:</strong> {applicant.user?.email || 'N/A'}</p>
-                      <p><strong>Student ID:</strong> {applicant.user?.studentId || 'N/A'}</p>
-                      <p><strong>Academic Status:</strong> {applicant.academic_status || 'N/A'}</p>
-                      <p><strong>Athletic Status:</strong> {applicant.athletic_status || 'N/A'}</p>
-                      <p><strong>Room Preference:</strong> {applicant.room_preference || 'N/A'}</p>
-                      <p><strong>Entered On:</strong> {new Date(applicant.created_at).toLocaleString()}</p>
-                      <button 
-                        onClick={() => handleRemoveApplicant(applicant.id)} 
-                        className="delete-applicant-button"
-                      >
-                        Remove Applicant
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span>{applicant.user?.email || 'N/A'}:</span>
-                      <span>{applicant.user?.studentId || 'N/A'} </span>
-                      <button 
-                        onClick={() => handleRemoveApplicant(applicant.id)} 
-                        className="delete-applicant-button"
-                      >
-                        Remove Applicant
-                      </button>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-            
-            {/* Close Button */}
-            <button onClick={handleCloseModal} className="close-button">Close</button>
+        {/* Update Lottery Section */}
+          <div className="dashboard-card update-card">
+            <h2>Update Lottery</h2>
+              <form onSubmit={handleUpdateLottery}>
+                <select
+                  value={updateLottery.id}
+                  onChange={handleUpdateLotterySelection}
+                  required
+                >
+                  <option value="">Select Lottery</option>
+                  {lotteries.map((lottery) => (
+                    <option key={lottery.id} value={lottery.id}>
+                      {lottery.lottery_name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Lottery Name"
+                  value={updateLottery.lottery_name || ''}
+                  onChange={(e) => setUpdateLottery({ ...updateLottery, lottery_name: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Building"
+                  value={updateLottery.building || ''}
+                  onChange={(e) => setUpdateLottery({ ...updateLottery, building: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Floor"
+                  value={updateLottery.floor || ''}
+                  onChange={(e) => setUpdateLottery({ ...updateLottery, floor: e.target.value })}
+                  required
+                />
+                <div>
+                  {updateLottery.room_types?.map((roomType, index) => (
+                    <div key={roomType.id || Date.now()} className="room-type-group">
+                      <input
+                        type="text"
+                        placeholder="Room Type"
+                        value={roomType.room_type || ''}
+                        onChange={(e) => handleUpdateRoomTypeChange(index, 'room_type', e.target.value)}
+                        required
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max Applicants"
+                        value={roomType.max_applicants || ''}
+                        onChange={(e) => handleUpdateRoomTypeChange(index, 'max_applicants', e.target.value)}
+                        required
+                      />
+                      {updateLottery.room_types.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUpdateRoomType(index)}
+                          className="remove-roomtype-button"
+                        >
+                          - Room Type
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={handleAddUpdateRoomType} className="add-roomtype-button">
+                    + Room Type
+                  </button>
+                </div>
+                <select
+                  value={updateLottery.status || ''}
+                  onChange={(e) => setUpdateLottery({ ...updateLottery, status: e.target.value })}
+                  required
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Open">Open</option>
+                  <option value="Closed">Closed</option>
+                </select>
+                <button type="submit" className="update-button">Update Lottery</button>
+              </form>
           </div>
+                {/* Manage Lotteries Section */}
+        <div className="dashboard-card manage-card">
+          <h2>Manage Lotteries</h2>
+          <ul>
+            {lotteries.map((lottery) => (
+              <li key={lottery.id}>
+                <p><strong>{lottery.lottery_name}</strong> - ID: {lottery.id}</p>
+                <p><strong>Building:</strong> {lottery.building}</p>
+                <p><strong>Floor:</strong> {lottery.floor}</p>
+                <p><strong>Status:</strong> {lottery.status}</p>
+                {lottery.room_types && lottery.room_types.map((roomType) => (
+                  <div key={roomType.id || Date.now()} className="room-type-display">
+                    <p><strong>Room Type:</strong> {roomType.room_type}</p>
+                    <p><strong>Max Applicants:</strong> {roomType.max_applicants}</p>
+                  </div>
+                ))}
+                <button onClick={() => handleOpenModal(lottery.id)} className="edit-button">View Applicants</button>
+                <button onClick={() => handleSelectWinners(lottery.id)} className="select-winners-button">Select Winners</button>
+                <button onClick={() => handleDeleteLottery(lottery.id)} className="delete-button">Delete</button>
+              </li>
+            ))}
+          </ul>
         </div>
-    )}
-  </div>
-</div>
-);
+
+        {/* Modal for Applicants */}
+        {showModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <h2>Applicants for Lottery ID: {selectedLottery}</h2>
+              <button onClick={toggleView} className="toggle-view-button">
+                {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
+              </button>
+              <ul className={isDetailedView ? 'detailed-view' : 'condensed-view'}>
+                {applicants.map(applicant => (
+                  <li key={applicant.id} className="applicant-item">
+                    {isDetailedView ? (
+                      <>
+                        <p><strong>Email:</strong> {applicant.user?.email || 'N/A'}</p>
+                        <p><strong>Student ID:</strong> {applicant.user?.studentId || 'N/A'}</p>
+                        <p><strong>Academic Status:</strong> {applicant.academic_status || 'N/A'}</p>
+                        <p><strong>Athletic Status:</strong> {applicant.athletic_status || 'N/A'}</p>
+                        <p><strong>Room Preference:</strong> {applicant.room_preference || 'N/A'}</p>
+                        <p><strong>Entered On:</strong> {new Date(applicant.created_at).toLocaleString()}</p>
+                      </>
+                    ) : (
+                      <>
+                        <span>{applicant.user?.email || 'N/A'}:</span>
+                        <span>{applicant.user?.studentId || 'N/A'}</span>
+                        <span> {applicant.room_preference || 'N/A'}</span>
+                      </>
+                    )}
+                    <button onClick={() => handleRemoveApplicant(applicant.id)} className="remove-applicant-button">
+                      Remove Applicant
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={handleCloseModal} className="close-button">Close</button>
+            </div>
+          </div>
+        )}
+
+        {/* Winners Modal */}
+        {showWinnersModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <h2>Winners for Lottery ID: {selectedLottery}</h2>
+              <button onClick={toggleView} className="toggle-view-button">
+                {isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
+              </button>
+              <ul className="winners-list">
+                {winners.map((winner, index) => (
+                  <li key={winner.id}>
+                    <p><strong>Winner {index + 1}:</strong> {winner.user?.email} - {winner.user?.studentId}</p>
+                    <p><strong>Room Preference:</strong> {winner.room_preference}</p>
+                    <p><strong>Academic Status:</strong> {winner.academic_status}</p>
+                    <p><strong>Athletic Status:</strong> {winner.athletic_status}</p>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={handleCloseWinnersModal} className="close-button">Close</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default AdminDashboard;

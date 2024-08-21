@@ -29,25 +29,26 @@ a {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 15px 0;
     position: sticky;
-    height: 17vh;
+    height: auto;
     width: 100%;
     top: 0;
     z-index: 100;
+    text-align: center;
 }
 
 .logo {
     height: 90px;
-    margin-top: 1vh;
+    margin: 20px auto;
+    display: block;
 }
 
 .nav-list {
     list-style: none;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    text-align: center;
 }
 
 .nav-list li {
+    display: inline-block;
     margin-left: 20px;
 }
 
@@ -68,22 +69,18 @@ a {
     background-size: cover;
     background-position: center;
     height: 100vh;
-    display: flex;
-    padding-top: 15vh;
-    margin-top: 40vh;
-    justify-content: center;
-    align-items: center;
+    padding-top: 20vh;
     text-align: center;
     color: white;
-    position: relative;
 }
 
 .hero-content {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 40px;
     border-radius: 10px;
-    width: 100%;
-    box-sizing: border-box;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .cta-button {
@@ -91,7 +88,6 @@ a {
     color: white;
     padding: 15px 30px;
     border-radius: 5px;
-    margin: 15px;
     margin-top: 30px;
     font-weight: bold;
     border: none;
@@ -104,6 +100,36 @@ a {
     transform: scale(1.05);
 }
 
+/* Button Section for Mobile */
+.button-section {
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    display: none; /* Hidden by default for desktop */
+}
+
+.button-group {
+    margin-top: 20px;
+}
+
+.button-section .cta-button {
+    background-color: #6d8d23;
+    color: white;
+    padding: 20px 40px; /* Larger buttons for mobile */
+    font-size: 16px; /* Increase font size */
+    border-radius: 8px;
+    margin: 15px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button-section .cta-button:hover {
+    background-color: #8ba749;
+    transform: scale(1.05);
+}
+
 /* Info Section */
 .info-section {
     padding: 60px 20px;
@@ -112,40 +138,16 @@ a {
 }
 
 .info-steps {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    margin-top: 40px;
-    margin-left: 10vh;
-    margin-right: 10vh;
+    margin: 40px auto;
 }
 
 .step {
-    flex: 1;
     background-color: white;
     padding: 20px;
-    margin: 10px;
+    margin: 10px auto;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 100vh;
-    transition: transform 0.3s ease;
-}
-
-.step:hover {
-    transform: translateY(-5px);
-}
-
-/* Responsive Design for Steps */
-@media (max-width: 768px) {
-    .info-steps {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .step {
-        max-width: 100%;
-        margin: 10px 0;
-    }
+    max-width: 60vh;
 }
 
 /* Timeline Section */
@@ -158,9 +160,8 @@ a {
 .timeline-list {
     list-style: none;
     padding: 0;
-    margin-top: 20px;
-    margin-left: 15vh;
-    margin-right: 15vh;
+    margin: 20px auto;
+    max-width: 90%;
 }
 
 .timeline-list li {
@@ -179,23 +180,33 @@ footer {
     text-align: center;
 }
 
-.footer-links {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    margin: 20px 0 0 0;
-}
+/* Mobile and Tablet Responsiveness */
+@media (max-width: 1024px) {
+    /* Hide hero section for mobile */
+    .hero {
+        display: none;
+    }
 
-.footer-links li {
-    margin-left: 20px;
-}
+    /* Show the button section for mobile */
+    .button-section {
+        display: block;
+    }
 
-.footer-links a {
-    color: white;
-    transition: color 0.3s ease;
-}
+    .cta-button {
+        padding: 20px 40px; /* Bigger buttons for better touch interaction */
+        font-size: 16px;
+    }
 
-.footer-links a:hover {
-    color: #a4c062;
+    .info-steps {
+        width: 90%;
+    }
+
+    .step {
+        max-width: 100%;
+        margin: 20px 0;
+    }
+
+    .timeline-list {
+        max-width: 100%;
+    }
 }
