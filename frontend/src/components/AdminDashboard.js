@@ -553,7 +553,41 @@ function AdminDashboard() {
               <button onClick={handleCloseWinnersModal} className="close-button">Close</button>
             </div>
           </div>
-        )}
+        )}{/* Winners Modal */}
+				{showWinnersModal && (
+				  <div className="modal">
+					<div className="modal-content">
+					  <h2>Winners for Lottery ID: {selectedLottery}</h2>
+					  <button onClick={toggleView} className="toggle-view-button">
+						{isDetailedView ? 'Switch to Condensed View' : 'Switch to Detailed View'}
+					  </button>
+					  <ul className={isDetailedView ? 'detailed-view' : 'condensed-view'}>
+						{winners.map((winner, index) => (
+						  <li key={winner.id} className="winner-item">
+							{isDetailedView ? (
+							  <>
+								<p><strong>Winner {index + 1}:</strong> {winner.user?.email || 'N/A'}</p>
+								<p><strong>Student ID:</strong> {winner.user?.studentId || 'N/A'}</p>
+								<p><strong>Room Preference:</strong> {winner.room_preference || 'N/A'}</p>
+								<p><strong>Academic Status:</strong> {winner.academic_status || 'N/A'}</p>
+								<p><strong>Athletic Status:</strong> {winner.athletic_status || 'N/A'}</p>
+								<p><strong>Entered On:</strong> {new Date(winner.created_at).toLocaleString()}</p>
+							  </>
+							) : (
+							  <>
+								<span>{winner.user?.email || 'N/A'}:</span>
+								<span>{winner.user?.studentId || 'N/A'}</span>
+								<span> {winner.room_preference || 'N/A'}</span>
+							  </>
+							)}
+						  </li>
+						))}
+					  </ul>
+					  <button onClick={handleCloseWinnersModal} className="close-button">Close</button>
+					</div>
+				  </div>
+				)}
+
       </div>
     </div>
   );
