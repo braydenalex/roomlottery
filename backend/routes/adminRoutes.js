@@ -12,7 +12,6 @@ router.post('/lotteries/create', verifyAdminToken, async (req, res) => {
   }
 
   try {
-    // Create the main lottery in the room_lottery table
     const lottery = await RoomLottery.create({ 
       lottery_name, 
       building, 
@@ -133,6 +132,7 @@ router.delete('/lotteries/:id', verifyAdminToken, async (req, res) => {
   }
 });
 
+// Route to fetch applicants
 router.get('/lotteries/:lottery_id/applicants', verifyAdminToken, async (req, res) => {
   const { lottery_id } = req.params;
 
@@ -142,10 +142,9 @@ router.get('/lotteries/:lottery_id/applicants', verifyAdminToken, async (req, re
       include: [
         {
           model: User,
-          attributes: ['email', 'studentId'], // Pull email and studentId from User
+          attributes: ['email', 'studentId'],
         }
       ],
-      // Specify the fields you want to include from the UserLotteryEntry model
       attributes: ['id', 'academic_status', 'athletic_status', 'room_preference', 'created_at'],
     });
 
@@ -161,7 +160,6 @@ router.get('/lotteries/:lottery_id/applicants', verifyAdminToken, async (req, re
     res.status(500).json({ error: 'Failed to fetch applicants' });
   }
 });
-
 
 // Route to delete an applicant from a specific lottery
 router.delete('/lotteries/:lottery_id/applicants/:applicant_id', verifyAdminToken, async (req, res) => {
@@ -182,6 +180,7 @@ router.delete('/lotteries/:lottery_id/applicants/:applicant_id', verifyAdminToke
   }
 });
 
+// Route to select winners with algorithm
 router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) => {
   const { id } = req.params;
   
@@ -198,7 +197,7 @@ router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) 
       where: { lottery_id: id },
       include: [{ model: User, attributes: ['email', 'studentId'] }],
       order: [
-        ['athletic_status', 'DESC'],  // Athletes first
+        ['athletic_status', 'DESC'],  // athletic_status is not a boolean but its sorted highest since "Athlete" is a higher value in the alphabet than "N/A"
         ['academic_status', 'DESC'],  // Honors students next
         ['created_at', 'ASC'],        // Then by time of entry
       ],

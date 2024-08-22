@@ -27,7 +27,6 @@ const RoomLottery = sequelize.define('room_lottery', {
   tableName: 'room_lotteries',
 });
 
-// Setting the alias 'room_types' for the association
 RoomLottery.hasMany(LotteryRoomType, { foreignKey: 'lottery_id', as: 'room_types' });
 LotteryRoomType.belongsTo(RoomLottery, { foreignKey: 'lottery_id' });
 

@@ -15,9 +15,8 @@ router.get('/me', verifyToken, async (req, res) => {
     }
 
     // Check if the user is an admin by querying the admin table or adding the `isAdmin` flag
-    const isAdmin = req.user.isAdmin;  // Assuming the `isAdmin` flag is added when issuing the token
+    const isAdmin = req.user.isAdmin;
 
-    // Respond with user data and `isAdmin` flag
     res.json({ ...user.toJSON(), isAdmin });
   } catch (error) {
     console.error(error);
@@ -33,18 +32,15 @@ router.get('/my-lotteries', verifyToken, async (req, res) => {
       where: { user_id: userId },
       include: [{
         model: RoomLottery,
-        as: 'room_lottery',  // Ensure alias is correct
+        as: 'room_lottery',
         include: [{
           model: LotteryRoomType,
-          as: 'room_types',  // Ensure alias is correct
+          as: 'room_types',
           attributes: ['id', 'room_type', 'max_applicants'],
         }],
         attributes: ['id', 'lottery_name', 'building', 'floor', 'status'],
       }],
     });
-
-    // Log the fetched lotteries for debugging
-    console.log('Entered Lotteries:', JSON.stringify(enteredLotteries, null, 2));
 
     res.json(enteredLotteries);
   } catch (error) {
@@ -135,34 +131,6 @@ router.post('/enter-lottery/:lottery_id', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error entering lottery:', error);
     res.status(500).json({ error: 'Failed to enter lottery' });
-  }
-});
-
-// Fetch notifications for the logged-in user
-router.get('/notifications', verifyToken, async (req, res) => {
-  try {
-    const notifications = await Notification.findAll({
-      where: { user_id: req.user.id, is_read: false },
-      order: [['created_at', 'DESC']],
-    });
-    res.json(notifications);
-  } catch (error) {
-    console.error('Failed to fetch notifications:', error);
-    res.status(500).json({ error: 'Failed to fetch notifications' });
-  }
-});
-
-// Clear all notifications for the logged-in user
-router.delete('/notifications', verifyToken, async (req, res) => {
-  try {
-    await Notification.update(
-      { is_read: true },
-      { where: { user_id: req.user.id } }
-    );
-    res.json({ message: 'Notifications cleared' });
-  } catch (error) {
-    console.error('Failed to clear notifications:', error);
-    res.status(500).json({ error: 'Failed to clear notifications' });
   }
 });
 

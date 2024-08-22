@@ -56,6 +56,7 @@ function AdminDashboard() {
     fetchUserAndLotteries();
   }, [navigate]);
 
+    // Handles fetching lotteries
     const fetchLotteries = async (token) => {
     try {
       const lotteriesResponse = await fetch('/api/admin/lotteries/all', {
@@ -72,6 +73,7 @@ function AdminDashboard() {
     }
   };
 
+  // Handles creating lotteries
   const handleCreateLottery = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -99,6 +101,7 @@ function AdminDashboard() {
       setError('Failed to create lottery');
     }
   };
+
 
   const handleRoomTypeChange = (index, field, value) => {
     setNewLottery((prevState) => {
@@ -172,7 +175,7 @@ function AdminDashboard() {
           floor: '',
           room_types: [{ id: Date.now(), room_type: '', max_applicants: '' }],
           status: '',
-        });  // Reset form
+        });
         await fetchLotteries(token);  // Refresh lotteries list
       } else {
         setError('Failed to update lottery');

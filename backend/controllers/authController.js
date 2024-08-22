@@ -26,7 +26,6 @@ exports.register = async (req, res) => {
 
     const { studentId, email, password } = req.body;
 
-    // Validate the password
     try {
       validatePassword(password);
     } catch (validationError) {

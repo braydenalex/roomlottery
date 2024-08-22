@@ -53,12 +53,6 @@ function Dashboard() {
         const availableData = await availableResponse.json();
         setAvailableLotteries(availableData || []);
 
-        // Fetch notifications
-        const notificationResponse = await fetch('/api/user/notifications', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const notificationData = await notificationResponse.json();
-        setNotifications(notificationData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to fetch data');
@@ -68,19 +62,6 @@ function Dashboard() {
 
     fetchUserAndLotteries();
   }, [navigate]);
-
-  const clearNotifications = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      await fetch('/api/user/notifications', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications([]);
-    } catch (error) {
-      console.error('Failed to clear notifications:', error);
-    }
-  };
 
   const handleEnterLottery = async (lotteryId) => {
     setSelectedLottery(lotteryId);
@@ -99,36 +80,48 @@ function Dashboard() {
     }
   };
 
-  const submitPreferences = async () => {
-    if (!preferences.room_preference || !preferences.academic_status || !preferences.athletic_status) {
-      setFormError('Please make sure to select all required preferences.');
-      return;
-    }
+const submitPreferences = async () => {
+  if (!preferences.room_preference || !preferences.academic_status || !preferences.athletic_status) {
+    setFormError('Please make sure to select all required preferences.');
+    return;
+  }
 
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`/api/user/enter-lottery/${selectedLottery}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(preferences),
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`/api/user/enter-lottery/${selectedLottery}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(preferences),
+    });
+
+    if (response.ok) {
+      const newEntry = await response.json();
+      setEnteredLotteries([...enteredLotteries, newEntry]);  // Update entered lotteries
+
+      // Update available lotteries by refetching or removing the entered one
+      setAvailableLotteries(availableLotteries.filter(lottery => lottery.id !== selectedLottery));
+
+      // Clear form and modal
+      setPreferences({
+        room_preference: '',
+        academic_status: '',
+        athletic_status: '',
       });
+      setShowModal(false);
 
-      if (response.ok) {
-        const newEntry = await response.json();
-        setEnteredLotteries([...enteredLotteries, newEntry]);
-        setAvailableLotteries(availableLotteries.filter(lottery => lottery.id !== selectedLottery));
-        setShowModal(false);
-      } else {
-        setError('Failed to enter the lottery');
-      }
-    } catch (error) {
-      console.error('Error entering lottery:', error);
+      // Refetch lotteries to update the UI
+      await fetchUserAndLotteries();  // Refetch lotteries to update entered and available lotteries
+    } else {
       setError('Failed to enter the lottery');
     }
-  };
+  } catch (error) {
+    console.error('Error entering lottery:', error);
+    setError('Failed to enter the lottery');
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem('token');

@@ -5,7 +5,7 @@ import '../css/auth.css';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);  // Added showPassword state
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -24,9 +24,9 @@ function Login() {
       if (response.ok) {
         localStorage.setItem('token', data.token);
         if (data.isAdmin) {
-          navigate('/admin-dashboard'); // Redirect to admin dashboard if admin
+          navigate('/admin-dashboard');
         } else {
-          navigate('/dashboard'); // Redirect to user dashboard otherwise
+          navigate('/dashboard');
         }
       } else {
         setError(data.error || 'Login failed');
@@ -59,7 +59,7 @@ function Login() {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
-              type={showPassword ? 'text' : 'password'}  // Toggle between text and password
+              type={showPassword ? 'text' : 'password'}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -68,7 +68,7 @@ function Login() {
             <button
               type="button"
               className="show-password-toggle"
-              onClick={() => setShowPassword((prev) => !prev)}  // Toggle showPassword state
+              onClick={() => setShowPassword((prev) => !prev)}
             >
               {showPassword ? 'Hide' : 'Show'}
             </button>
