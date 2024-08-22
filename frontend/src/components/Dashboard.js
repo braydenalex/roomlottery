@@ -8,7 +8,6 @@ function Dashboard() {
   const [availableLotteries, setAvailableLotteries] = useState([]);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [selectedLottery, setSelectedLottery] = useState(null);
   const [roomTypes, setRoomTypes] = useState([]);
   const [preferences, setPreferences] = useState({
