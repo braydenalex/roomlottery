@@ -8,7 +8,7 @@ LotteryRoomType.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'RoomLottery',
+      model: 'room_lotteries',
       key: 'id'
     },
   },
