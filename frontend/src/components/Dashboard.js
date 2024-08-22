@@ -111,8 +111,6 @@ const submitPreferences = async () => {
       });
       setShowModal(false);
 
-      // Refetch lotteries to update the UI
-      await fetchUserAndLotteries();  // Refetch lotteries to update entered and available lotteries
     } else {
       setError('Failed to enter the lottery');
     }
