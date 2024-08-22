@@ -147,24 +147,6 @@ function Dashboard() {
 
           {error && <p className="error-message">{error}</p>}
 
-          <h2>Notifications</h2>
-          {notifications.length > 0 ? (
-            <ul className="notification-list">
-              {notifications.map((notification) => (
-                <li key={notification.id} className="notification-item">
-                  {notification.message}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No notifications at the moment.</p>
-          )}
-          {notifications.length > 0 && (
-            <button onClick={clearNotifications} className="clear-notifications-button">
-              Clear All Notifications
-            </button>
-          )}
-
           <h2>Your Entered Lotteries</h2>
           {enteredLotteries.length > 0 ? (
             <ul className="lottery-list">
@@ -180,7 +162,7 @@ function Dashboard() {
                           {Array.isArray(lotteryEntry.room_lottery.room_types) && lotteryEntry.room_lottery.room_types.length > 0
                             ? lotteryEntry.room_lottery.room_types.map((roomType) => (
                                 <span key={roomType.id}>
-                                  {roomType.room_type} ({roomType.max_applicants} spots)
+                                  &nbsp;{roomType.room_type} ({roomType.max_applicants} spots)
                                 </span>
                               ))
                             : 'No room types available'}

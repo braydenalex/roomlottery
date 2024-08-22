@@ -184,7 +184,7 @@ router.delete('/lotteries/:lottery_id/applicants/:applicant_id', verifyAdminToke
 
 router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) => {
   const { id } = req.params;
-
+  
   try {
     const lottery = await RoomLottery.findByPk(id, {
       include: [{ model: LotteryRoomType, as: 'room_types' }]
@@ -196,10 +196,19 @@ router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) 
 
     const applicants = await UserLotteryEntry.findAll({
       where: { lottery_id: id },
-      include: [{ model: User, attributes: ['email', 'studentId', 'id'] }],
-      order: [['athletic_status', 'DESC'], ['academic_status', 'DESC'], ['created_at', 'ASC']],
+      include: [{ model: User, attributes: ['email', 'studentId'] }],
+      order: [
+        ['athletic_status', 'DESC'],  // Athletes first
+        ['academic_status', 'DESC'],  // Honors students next
+        ['created_at', 'ASC'],        // Then by time of entry
+      ],
     });
 
+    if (applicants.length === 0) {
+      return res.status(404).json({ message: 'No applicants found for this lottery.' });
+    }
+
+    // Map room types to their availability
     const roomAvailability = {};
     for (const roomType of lottery.room_types) {
       roomAvailability[roomType.room_type] = roomType.max_applicants;
@@ -209,17 +218,14 @@ router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) 
     
     for (const applicant of applicants) {
       const preferredRoom = applicant.room_preference;
+
+      // Check if there are spots available for the preferred room type
       if (roomAvailability[preferredRoom] > 0) {
         winners.push(applicant);
-        roomAvailability[preferredRoom] -= 1;
-
-        // Create a notification for the winner
-        await Notification.create({
-          user_id: applicant.user.id,
-          message: `Congratulations! You have won a spot in the ${lottery.lottery_name} lottery.`,
-        });
+        roomAvailability[preferredRoom] -= 1;  // Decrement available spots
       }
 
+      // Stop once there are no more rooms left to allocate
       if (Object.values(roomAvailability).every(spots => spots === 0)) {
         break;
       }
@@ -231,5 +237,6 @@ router.post('/lotteries/:id/select-winners', verifyAdminToken, async (req, res) 
     res.status(500).json({ error: 'Failed to select winners' });
   }
 });
+
 
 module.exports = router;
