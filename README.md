@@ -1,10 +1,9 @@
 # Room Lottery System
 
-The **Room Lottery System** is a full-stack web application built for a school project to fairly and efficiently manage student applications for limited school housing. The system prioritizes students based on their academic and athletic status and allows administrators to oversee the entire lottery process seamlessly.
+The **Room Lottery System** is a full-stack web application built to fairly and efficiently manage student applications for limited school housing. The system prioritizes students based on their academic and athletic status and allows administrators to oversee the entire lottery process seamlessly.
 
 ## Use Case
 
-**Type:** School Project  
 This project addresses inefficiencies in a school’s existing room allocation system by introducing a fairer, more transparent process, ensuring that each student's needs and achievements are considered in the lottery selection.
 
 ## Features
@@ -19,7 +18,7 @@ This project addresses inefficiencies in a school’s existing room allocation s
 
 ## Backstory
 
-This project was initiated to address the shortcomings of the school's previous room allocation system, which often assigned students to the wrong rooms or failed to prioritize honors students and athletes correctly. This new system resolves those issues while introducing greater equity in room allocation.
+This project was initiated to address the shortcomings of my school's previous room allocation system, which often assigned students to the wrong rooms or failed to prioritize honors students and athletes correctly. This new system resolves those issues while introducing greater equity in room allocation.
 
 ## Technologies Used
 
