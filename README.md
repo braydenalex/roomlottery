@@ -37,7 +37,7 @@ This project was initiated to address the shortcomings of my school's previous r
 
 # Installation and Configuration
 ### Configuration
-You need to create a .env file on the serverside/sequelize (backend)
+You need to create a `.env` file on the serverside/sequelize (backend)
 ```
 DB_USER=XXXXXX
 DB_PASSWORD=XXXXXX
