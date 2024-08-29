@@ -33,7 +33,6 @@ This project was initiated to address the shortcomings of my school's previous r
 
 - [GitHub Repository](https://github.com/braydenalex/roomlottery)
 - [Live Demo](https://roomlottery.braydenseaman.com)
-- 
 
 # Installation and Configuration
 ### Configuration
