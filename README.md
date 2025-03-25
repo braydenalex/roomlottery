@@ -34,6 +34,13 @@ This project was initiated to address the shortcomings of my school's previous r
 - [GitHub Repository](https://github.com/braydenalex/roomlottery)
 - [Live Demo](https://roomlottery.braydenseaman.com)
 
+## Demo Account
+
+``
+Email: demo@pointpark.edu
+Password: demotester%%
+```
+
 # Installation and Configuration
 ### Configuration
 You need to create a `.env` file on the serverside/sequelize (backend)
