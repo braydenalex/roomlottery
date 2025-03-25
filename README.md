@@ -39,7 +39,7 @@ This project was initiated to address the shortcomings of my school's previous r
 ``
 Email: demo@pointpark.edu
 Password: demotester%%
-```
+``
 
 # Installation and Configuration
 ### Configuration
